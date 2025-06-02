@@ -4,12 +4,14 @@ import time
 import hashlib
 import secrets
 from copy import copy
+from st_copy_to_clipboard import st_copy_to_clipboard
+import streamlit.components.v1 as components
 
 logging.basicConfig(level=logging.CRITICAL,
                     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# --- RSA Implementation (from CSCI663Project_RSA.py) ---
+# --- RSA Implementation ---
 def get_rsa_functions():
     def is_probably_prime(p, s=5):
         if p < 2: return False
@@ -117,7 +119,7 @@ def get_rsa_functions():
 
 generate_keys, encrypt_rsa, decrypt_rsa = get_rsa_functions()
 
-# --- AES Implementation (from CSCI663Project_AES.py) ---
+# --- AES Implementation ---
 ROUND_CONSTANT = [
     0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a,
     0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39,
@@ -510,6 +512,51 @@ if choice == "AES Encryption":
                     aes_ciphertext = encrypt_aes_string(aes_plaintext_input, aes_password_encrypt, aes_encryption_steps)
                     st.subheader("AES Encrypted Message (Latin-1 encoded):")
                     st.text_area("Ciphertext", aes_ciphertext, height=150, disabled=True, key="aes_enc_output_text")
+                    # # st.button("Copy Ciphertext Below", on_click=lambda: st.code(aes_ciphertext, language="text"))
+                    # st_copy_to_clipboard(aes_ciphertext, label="Copy Ciphertext to Clipboard")
+
+                    components.html(
+                        f"""
+                        <style>
+                            .copy-btn {{
+                                background-color: transparent;
+                                border: 1px solid #F0F2F6;
+                                padding: 6px 14px;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-size: 16px;
+                                font-family: 'Inter', sans-serif;
+                            }}
+                            .copy-btn:hover {{
+                                border-color: #F63366;
+                            }}
+                            .toast {{
+                                display: none;
+                                position: fixed;
+                                bottom: 30px;
+                                right: 30px;
+                                background-color: #333;
+                                color: white;
+                                padding: 10px 16px;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                opacity: 0.9;
+                                z-index: 9999;
+                                font-family: 'Inter', sans-serif;
+                            }}
+                        </style>
+
+                        <div id="toast" class="toast">✅ Copied ciphertext to clipboard</div>
+
+                        <button class="copy-btn" onclick="
+                            navigator.clipboard.writeText('{aes_ciphertext}');
+                            var toast = document.getElementById('toast');
+                            toast.style.display = 'block';
+                            setTimeout(() => {{ toast.style.display = 'none'; }}, 2000);
+                        ">📋</button>
+                        """,
+                        height=100,
+                    )
                     
                     with st.expander("Show AES Encryption Steps"):
                         for step in aes_encryption_steps:
@@ -598,6 +645,49 @@ elif choice == "RSA Encryption":
                     rsa_ciphertext = encrypt_rsa(rsa_plaintext_input, n_val_enc, e_val_enc, message_is_int_enc)
                     st.subheader("RSA Encrypted Message:")
                     st.text_area("Ciphertext", str(rsa_ciphertext), height=150, disabled=True, key="rsa_enc_output_text")
+
+                    components.html(
+                        f"""
+                        <style>
+                            .copy-btn {{
+                                background-color: transparent;
+                                border: 1px solid #F0F2F6;
+                                padding: 6px 14px;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-size: 16px;
+                                font-family: 'Inter', sans-serif;
+                            }}
+                            .copy-btn:hover {{
+                                border-color: #F63366;
+                            }}
+                            .toast {{
+                                display: none;
+                                position: fixed;
+                                bottom: 30px;
+                                right: 30px;
+                                background-color: #333;
+                                color: white;
+                                padding: 10px 16px;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                opacity: 0.9;
+                                z-index: 9999;
+                                font-family: 'Inter', sans-serif;
+                            }}
+                        </style>
+
+                        <div id="toast" class="toast">✅ Copied ciphertext to clipboard</div>
+
+                        <button class="copy-btn" onclick="
+                            navigator.clipboard.writeText('{rsa_ciphertext}');
+                            var toast = document.getElementById('toast');
+                            toast.style.display = 'block';
+                            setTimeout(() => {{ toast.style.display = 'none'; }}, 2000);
+                        ">📋</button>
+                        """,
+                        height=100,
+                    )
 
     with rsa_tab2:
         # --- RSA Decrypt Section ---
